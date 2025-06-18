@@ -9,6 +9,7 @@ import torch.nn as nn
 from ..core import BaseConfig
 from ..misc import dist_utils
 
+import safetensors
 
 def to(m: nn.Module, device: str):
     if m is None:
@@ -250,6 +251,18 @@ class BaseSolver(object):
         """Load model for tuning and adjust mismatched head parameters"""
         if path.startswith("http"):
             state = torch.hub.load_state_dict_from_url(path, map_location="cpu")
+        elif path.endswith(".safetensors"):
+            print(f"Loading using safetensors: {path}")
+            state = safetensors.torch.load_file(path, device="cpu")
+            # Remove 'model.' prefix from keys
+            state = {k.replace("model.", ""): v for k, v in state.items()}
+            for k, v in state.items():
+                if "stem1" in k:
+                    print(f"Found stem1: {k}")
+            #print(f"Keys: {list(state.keys())}")
+            state = {
+                "model": state,
+            }
         else:
             state = torch.load(path, map_location="cpu")
 

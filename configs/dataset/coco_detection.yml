@@ -5,7 +5,7 @@ evaluator:
   iou_types: ['bbox', ]
 
 num_classes: 80
-remap_mscoco_category: True
+remap_mscoco_category: False
 
 train_dataloader:
   type: DataLoader
