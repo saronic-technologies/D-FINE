@@ -11,8 +11,8 @@ train_dataloader:
   type: DataLoader
   dataset:
     type: CocoDetection
-    img_folder: /home/catid/sources/D-FINE/ir_obj_det_coco/images/train
-    ann_file: /home/catid/sources/D-FINE/ir_obj_det_coco/annotations/instances_train.json
+    img_folder: /mnt/local/D-FINE/datasets/ir_obj_det_coco/images/train
+    ann_file: /mnt/local/D-FINE/datasets/ir_obj_det_coco/annotations/instances_train.json
     return_masks: False
     transforms:
       type: Compose
@@ -28,8 +28,8 @@ val_dataloader:
   type: DataLoader
   dataset:
     type: CocoDetection
-    img_folder: /home/catid/sources/D-FINE/based_eval_coco/images/train
-    ann_file: /home/catid/sources/D-FINE/based_eval_coco/annotations/instances_train.json
+    img_folder: /mnt/local/D-FINE/datasets/based_eval_coco/images/train
+    ann_file: /mnt/local/D-FINE/datasets/based_eval_coco/annotations/instances_train.json
     return_masks: False
     transforms:
       type: Compose
