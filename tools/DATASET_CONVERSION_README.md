@@ -41,9 +41,6 @@ boat 0.434754 0.281722 0.561685 0.487134
 ### 1. Basic Conversion
 
 ```bash
-# Navigate to D-FINE directory
-cd /home/catid/sources/D-FINE
-
 # Convert your dataset (default is LTRB format)
 python tools/prepare_custom_dataset.py \
   --input-dir /path/to/your/dataset/eo \
