@@ -1,45 +1,35 @@
-cmake_minimum_required(VERSION 3.5.1)
-
-project(
-    trtExample
-    LANGUAGES CXX
-    VERSION 1.0.0
-)
+cmake_minimum_required(VERSION 3.20)
+cmake_policy(SET CMP0146 OLD)   # for disabling FindCUDA warning
+project(DFineTRT)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "-O3")
 
-if (MSVC)
-    add_compile_options(-nologo)
-    add_definitions(-DNOMINMAX)
-else()
-    add_compile_options(-Wall)
-endif()
+set(LIB_ROOT "$ENV{HOME}/Documents/libs")
 
-find_package(OpenCV CONFIG REQUIRED core dnn imgcodecs imgproc)
+# opencv
+find_package(OpenCV REQUIRED)
+find_package(Iconv QUIET)
+# cuda
 find_package(CUDA REQUIRED)
+# tensorrt
+set(CUDA_RUNTIME_API_DIRS "/usr/local/cuda-12.9/targets/x86_64-linux/include")
 
-set(tensorrt_include_DIR $ENV{Tensorrt_DIR}/include)
-set(tensorrt_lib_DIR $ENV{Tensorrt_DIR}/lib)
-
-file(GLOB tensorrt_libs
-    "${tensorrt_lib_DIR}/*.lib"
+# dfine
+add_executable(trtExample trtExample.cpp)
+target_compile_options(trtExample PRIVATE
+    -Wall
+    -Wextra
+    -Wno-unused-function
 )
-message("Tensorrt include: ${tensorrt_include_DIR}")
-message("Tensorrt lib: ${tensorrt_lib_DIR}")
-
-add_executable(
-    trtExample
-    trtExample.cpp
-)
-target_link_libraries(
-    ${tensorrt_libs}
+target_link_libraries(trtExample
+    ${OpenCV_LIBS}
     ${CUDA_LIBRARIES}
-    opencv_core
-    opencv_dnn
-    opencv_imgcodecs
+    nvonnxparser
+    nvinfer
 )
-target_include_directories(
-    trtExample PUBLIC
-    ${tensorrt_include_DIR}
-    ${CUDA_INCLUDE_DIRS}
+target_include_directories(trtExample PRIVATE
+    ${OpenCV_INCLUDE_DIRS}
+    ${CUDA_RUNTIME_API_DIRS}
 )
