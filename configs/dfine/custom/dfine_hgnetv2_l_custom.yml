@@ -31,6 +31,27 @@ optimizer:
   weight_decay: 0.0001
 
 
+# ---------------------------------------------------------------------------
+# LR scheduler
+# ---------------------------------------------------------------------------
+# Override the scheduler inherited from `include/optimizer.yml` so that the
+# learning-rate is multiplied by `gamma` (0.1 ⇒ 10× decay) once the training
+# reaches epoch 25.  This keeps the rest of the configuration intact while
+# ensuring the decay happens inside the 28-epoch training window defined in
+# this file.
+
+lr_scheduler:
+  # Linearly decay the learning-rate from its initial value down to
+  # 0.1 × lr over the first 25 training epochs and keep it constant
+  # afterwards.  The built-in ``LinearLR`` scheduler—available from
+  # PyTorch 1.13 onward—is registered inside ``src/optim/optim.py`` so it can
+  # be referenced directly from the YAML configuration.
+  type: LinearLR
+  start_factor: 1.0   # begin at the original learning-rate
+  end_factor: 0.1     # reach 0.1 × lr
+  total_iters: 25     # number of epochs for the decay phase
+
+
 # Increase to search for the optimal ema
 epochs: 28
 train_dataloader:
