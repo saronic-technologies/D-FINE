@@ -25,7 +25,12 @@ train_dataloader:
     return_masks: False
     transforms:
       type: Compose
-      ops: ~
+      ops:
+        # Ensure that every input image is resized to 1280×1280 (the size expected by the
+        # DFINE pre-trained checkpoints).  The fixed resolution guarantees that the cached
+        # positional embeddings inside the HybridEncoder match the feature-map size and
+        # prevents the size-mismatch error observed with 640×512 inputs.
+        - {type: Resize, size: [1280, 1280]}
   shuffle: True
   num_workers: 2
   drop_last: True
@@ -42,10 +47,10 @@ val_dataloader:
     return_masks: False
     transforms:
       type: Compose
-      ops: ~
+      ops:
+        - {type: Resize, size: [1280, 1280]}
   shuffle: False
   num_workers: 2
   drop_last: False
   collate_fn:
     type: BatchImageCollateFunction
-
