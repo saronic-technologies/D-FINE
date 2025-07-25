@@ -1,0 +1,75 @@
+task: detection
+
+# ---------------------------------------------------------------------------
+#   DATASET-SPECIFIC PARAMETERS
+# ---------------------------------------------------------------------------
+
+evaluator:
+  type: CocoEvaluator
+  iou_types: ['bbox']
+
+# Adjust to your IR data set
+num_classes: 9
+remap_mscoco_category: False
+
+# ---------------------------------------------------------------------------
+# TRAIN / VAL DATALOADERS (1280 × 1280 resolution)
+# ---------------------------------------------------------------------------
+
+train_dataloader:
+  type: DataLoader
+  dataset:
+    type: CocoDetection
+    img_folder: /mnt/local/D-FINE/ir_datasets/ir_obj_det_coco/images/train
+    ann_file: /mnt/local/D-FINE/ir_datasets/ir_obj_det_coco/annotations/instances_train.json
+    return_masks: False
+    transforms:
+      type: Compose
+      ops:
+        - {type: RandomPhotometricDistort, p: 0.5}
+        - {type: RandomZoomOut, fill: 0}
+        - {type: RandomIoUCrop, p: 0.8}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: RandomHorizontalFlip}
+        - {type: Resize, size: [1280, 1280]}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+        - {type: ConvertBoxes, fmt: 'cxcywh', normalize: True}
+      policy:
+        name: stop_epoch
+        epoch: 72
+        ops: ['RandomPhotometricDistort', 'RandomZoomOut', 'RandomIoUCrop']
+
+  collate_fn:
+    type: BatchImageCollateFunction
+    base_size: 1280
+    base_size_repeat: 3
+    stop_epoch: 72
+
+  shuffle: True
+  num_workers: 2
+  drop_last: True
+
+
+val_dataloader:
+  type: DataLoader
+  dataset:
+    type: CocoDetection
+    img_folder: /mnt/local/D-FINE/ir_datasets/based_eval_coco/images/train
+    ann_file: /mnt/local/D-FINE/ir_datasets/based_eval_coco/annotations/instances_train.json
+    return_masks: False
+    transforms:
+      type: Compose
+      ops:
+        - {type: Resize, size: [1280, 1280]}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+        - {type: ConvertBoxes, fmt: 'cxcywh', normalize: True}
+
+  collate_fn:
+    type: BatchImageCollateFunction
+    base_size: 1280
+
+  shuffle: False
+  num_workers: 2
+  drop_last: False
+
