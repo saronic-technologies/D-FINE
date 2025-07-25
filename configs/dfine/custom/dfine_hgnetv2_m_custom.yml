@@ -1,5 +1,5 @@
 __include__: [
-  '../../dataset/custom_detection.yml',
+  '../../dataset/ir_custom_detection.yml',
   '../../runtime.yml',
   '../include/dataloader.yml',
   '../include/optimizer.yml',
@@ -49,12 +49,41 @@ optimizer:
 
 # Increase to search for the optimal ema
 epochs: 132 # 120 + 4n
+# ---------------------------------------------------------------------------
+# DATA-LOADER OVERRIDES FOR 640 × 512 INPUT RESOLUTION
+# ---------------------------------------------------------------------------
+
 train_dataloader:
   dataset:
     transforms:
+      ops:
+        - {type: RandomPhotometricDistort, p: 0.5}
+        - {type: RandomZoomOut, fill: 0}
+        - {type: RandomIoUCrop, p: 0.8}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: RandomHorizontalFlip}
+        - {type: Resize, size: [640, 512]}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+        - {type: ConvertBoxes, fmt: 'cxcywh', normalize: True}
       policy:
         epoch: 120
+        ops: ['RandomPhotometricDistort', 'RandomZoomOut', 'RandomIoUCrop']
   collate_fn:
+    type: BatchImageCollateFunction
+    base_size: 640
+    base_size_repeat: 6
     stop_epoch: 120
     ema_restart_decay: 0.9998
-    base_size_repeat: 6
+
+val_dataloader:
+  dataset:
+    transforms:
+      ops:
+        - {type: Resize, size: [640, 512]}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+        - {type: ConvertBoxes, fmt: 'cxcywh', normalize: True}
+  collate_fn:
+    type: BatchImageCollateFunction
+    base_size: 640
+# keep other parameters (batch_size, num_workers, etc.) from included file
